@@ -25,7 +25,7 @@ const int zumbador = 5; // Pin digital para el zumbador
 void tono(int frecuencia, int duracion)
 {
   // Suena el tono en el zumbador
-  analogWriteFreq(frecuencia)
+  analogWriteFreq(frecuencia);
   analogWrite(zumbador, frecuencia);
   delay(duracion);
   // Para de sonar el tono en el zumbador
@@ -104,4 +104,10 @@ void play_music()
     tono(eH, 650);
    
     delay(500);
+}
+
+void play_alarm(){
+  tono(c, 200);
+  delay(30);
+  tono(c, 200);
 }

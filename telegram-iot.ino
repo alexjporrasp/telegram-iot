@@ -1,16 +1,16 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-// #include "zumbador.h"
+#include "zumbador.h"
 #include "home_wifi.h"
 
 // Update these with values suitable for your network.
 
-const char* mqtt_server = "192.168.100.12";
+const char* mqtt_server = "172.20.10.5";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-#define BUILTIN_LED 2
+#define EXTERNAL_LED 0
 #define MOTOR_RIGHT 4
 #define MOTOR_LEFT 5
 
@@ -39,18 +39,26 @@ void setup_wifi() {
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message Arrived");
 
-  if ((char)payload[0] == '3') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn LED ON
-  } else if ((char)payload[0] == '7'){
+  if ((char)payload[0] == '1') {
+    analogWrite(EXTERNAL_LED, 255);   // Turn LED ON
+  } else if ((char)payload[0] == '2') {
+    analogWrite(EXTERNAL_LED, 512);   // Turn LED ON
+  } else if ((char)payload[0] == '3') {
+    digitalWrite(EXTERNAL_LED, HIGH);   // Turn LED ON
+  } else if ((char)payload[0] == '5') {
+    play_music();
+  } 
+  else if ((char)payload[0] == '7'){
     digitalWrite(MOTOR_LEFT, LOW);
     digitalWrite(MOTOR_RIGHT, HIGH);  
   } else if ((char)payload[0] == '6'){
     digitalWrite(MOTOR_RIGHT, LOW);
     digitalWrite(MOTOR_LEFT, HIGH);   
   } else {
-    digitalWrite(BUILTIN_LED, HIGH);
+    digitalWrite(EXTERNAL_LED, LOW);
     digitalWrite(MOTOR_RIGHT, LOW);
     digitalWrite(MOTOR_LEFT, LOW);
+    play_alarm();
   }
 }
 
@@ -79,7 +87,7 @@ void reconnect() {
 }
 
 void setup() {
-  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  pinMode(EXTERNAL_LED, OUTPUT);     // Initialize the EXTERNAL_LED pin as an output
   pinMode(MOTOR_RIGHT, OUTPUT);
   pinMode(MOTOR_LEFT, OUTPUT);
   
@@ -96,8 +104,6 @@ void loop() {
   
   // digitalWrite(MOTOR_RIGHT, LOW);
   int analog_input = analogRead(A0);
-
-  Serial.println(analog_input);
   
   if (!client.connected()) {
     reconnect();
