@@ -4,12 +4,12 @@
 #include "home_wifi.h"
 
 // Update these with values suitable for your network.
-
-const char* mqtt_server = "172.20.10.5";
+const char* mqtt_server = "172.20.10.5"; // ip address of the mqtt server
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+// Constant defining the GPIO outputs
 #define EXTERNAL_LED 0
 #define MOTOR_RIGHT 4
 #define MOTOR_LEFT 5
@@ -21,7 +21,7 @@ void setup_wifi() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(ssid, password); // ssid and password are defined in 'home_wifi.h'
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -36,25 +36,26 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
+// Every time an MQTT message arrives this function is called
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message Arrived");
 
   if ((char)payload[0] == '1') {
-    analogWrite(EXTERNAL_LED, 255);   // Turn LED ON
+    analogWrite(EXTERNAL_LED, 255);   // LED with low intensity
   } else if ((char)payload[0] == '2') {
-    analogWrite(EXTERNAL_LED, 512);   // Turn LED ON
+    analogWrite(EXTERNAL_LED, 512);   // LED with medium intensity
   } else if ((char)payload[0] == '3') {
-    digitalWrite(EXTERNAL_LED, HIGH);   // Turn LED ON
+    digitalWrite(EXTERNAL_LED, HIGH);   // LED with high intensity
   } else if ((char)payload[0] == '5') {
-    play_music();
+    play_music(); // Reproduce music
   } 
-  else if ((char)payload[0] == '7'){
+  else if ((char)payload[0] == '7'){ // Turn motor direction one
     digitalWrite(MOTOR_LEFT, LOW);
     digitalWrite(MOTOR_RIGHT, HIGH);  
-  } else if ((char)payload[0] == '6'){
+  } else if ((char)payload[0] == '6'){ // Turn motor opposite direction
     digitalWrite(MOTOR_RIGHT, LOW);
     digitalWrite(MOTOR_LEFT, HIGH);   
-  } else {
+  } else { // Turn everything off
     digitalWrite(EXTERNAL_LED, LOW);
     digitalWrite(MOTOR_RIGHT, LOW);
     digitalWrite(MOTOR_LEFT, LOW);
@@ -75,7 +76,7 @@ void reconnect() {
       // Once connected, publish an announcement...
       // client.publish("outTopic", "hello world");
       // ... and resubscribe
-      client.subscribe("/led_on");
+      client.subscribe("/led_on"); // '/led_on' is the name of the topic that handles the system
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -87,7 +88,7 @@ void reconnect() {
 }
 
 void setup() {
-  pinMode(EXTERNAL_LED, OUTPUT);     // Initialize the EXTERNAL_LED pin as an output
+  pinMode(EXTERNAL_LED, OUTPUT);     // Initialize pins as output
   pinMode(MOTOR_RIGHT, OUTPUT);
   pinMode(MOTOR_LEFT, OUTPUT);
   
@@ -101,9 +102,9 @@ void setup() {
 }
 
 void loop() {
-  
+  // Commented code is for debugging purposes
   // digitalWrite(MOTOR_RIGHT, LOW);
-  int analog_input = analogRead(A0);
+  // int analog_input = analogRead(A0);
   
   if (!client.connected()) {
     reconnect();
@@ -111,5 +112,5 @@ void loop() {
   
   client.loop();
 
-  long now = millis();
+  // long now = millis();
 }
